@@ -1,5 +1,6 @@
 \documentclass{ctexart}
-\usepackage[colorlinks, linkcolor = red]{hyperref}
+
+\usepackage{enumitem}
 \usepackage{tcolorbox}
 \usepackage{fancyvrb}%在 Verbatim 环境中使用 LaTeX 命令
 \tcbuselibrary{skins}
@@ -7,6 +8,8 @@
 \usepackage{geometry}
 \geometry{margin = 1in}
 
+\usepackage{fontspec}
+\usepackage[colorlinks, linkcolor = red]{hyperref}
 \def\mydollar{{\fontspec{Consolas}\$\ }}% 单个字体设置
 \definecolor{structure}{RGB}{0,120,2}
 \definecolor{main}{RGB}{0,166,82}
@@ -26,117 +29,199 @@
     #1
 }
 
-\title{git 学习笔记}
+\title{Git 学习笔记}
 \author{ZiTai}
 \date{\zhdate{2023/1/04}}
 
 \begin{document}
 \maketitle
-\tableofcontents
+
 \clearpage
+\tableofcontents
 
+\clearpage
+\section{起步}
+    作为编程小白，我们所接触到的代码都还很简单，一个人就可以完成对代码的开发、维护。
+    但当我们涉及到多人合作开发时，就得思考一份代码如何保持同步？
+    代码搞砸了如何回退到上一个版本？
+    如此看来，所谓版本控制系统（Version Control System, VCS）
+    就是一种记录一个或若干文件内容变化，以便将来查阅特定版本修改情况的系统。
 
-\section{git 是什么？}
-\subsection*{直接记录快照，而非差异比较}
-    Git 和其它版本控制系统（包括 Subversion 和近似工具）的主要差别在于 Git 对待数据的方式。从概念上来说，其它大部分系统以文件变更列表的方式存储信息，这类系统（CVS、Subversion、Perforce、Bazaar 等等）将它们存储的信息看作是一组基本文件和每个文件随时间积累的差异（它们通常称作\textbf{基于差异（delta-based）}的版本控制）。
+\subsection*{本地版本控制系统}
 
-\subsection*{三种状态}
+\subsection*{集中化的版本控制系统（Centralized Version Control Systems, CVCS）}
+
+\subsection*{分布式版本控制系统}
+    常见的分布式版本控制系统（Distributed Version Control System, DVCS）有 Git、Mercurial、Bazaar 以及 Darcs 等，
+    客户端不只是提取最新版本的文件快照，而且把代码仓库完整地镜像下来，包括完整的历史记录。
+    如此一来，任何一处协同工作用的服务器发生故障，事后都可以用任何一个镜像出来的本地仓库恢复。
+    因为每一次的克隆操作，实际上都是一次对代码仓库的的完整备份。
+
+\clearpage
+\section{Git 是什么？}
+\subsection{直接记录快照，而非差异比较}
+    Git 和其它版本控制系统（包括 Subversion 和近似工具）的主要差别在于 Git 对待数据的方式。
+    从概念上来说，其它大部分系统以文件变更列表的方式存储信息，
+    这类系统（CVS、Subversion、Perforce、Bazaar 等等）将它们存储的信息看作是一组基本文件和每个文件随时间积累的差异（它们通常称作\textbf{基于差异（delta-based）}的版本控制）。
+
+    Git 却不是这样，它将数据看作是对小型文件系统的一系列快照。
+
+\subsection{三种状态}
     Git 有三种状态，文件只会处于其中之一：
-\begin{enumerate}
-    \item 已修改（modified）：表示修改了文件，但还没保存到数据库中。
-    \item 已暂存（staged）：表示对一个已修改文件的当前版本做了标记，使之包含在下次提交的快照中。
-    \item 已提交（committed）：表示数据已经安全地保存在本地数据库中。
-\end{enumerate}
+
+    \begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
+        \item 已修改（modified）：表示修改了文件，但还没保存到数据库中。
+        \item 已暂存（staged）：表示对一个已修改文件的当前版本做了标记，使之包含在下次提交的快照中。
+        \item 已提交（committed）：表示数据已经安全地保存在本地数据库中。
+    \end{enumerate}
 
     文件的这些状态会让 Git 项目拥有三个阶段：工作区、暂存区以及 Git 目录。
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale = 0.5]{pictures/01.png}
-    \caption{工作区、暂存区以及 Git 目录}
+    \includegraphics[width=0.80\textwidth]{pictures/01.png}
+    \caption{工作区、暂存区以及 Git 目录（仓库）}
 \end{figure}
-    工作区是对项目的某个版本独立提取出来的内容。这些从 Git 仓库的压缩数据库中提取出来的文件，放在磁盘上供用户使用或修改。
 
-    暂存区是一个文件，保存了下次将要提交的文件列表信息，一般在 Git 仓库目录中。按照 Git 的术语叫做“索引”，一般叫“暂存区”。
+    工作区是对项目的某个版本独立提取出来的内容。
+    这些从 Git 仓库的压缩数据库中提取出来的文件，放在磁盘上供用户使用或修改。
 
-    Git 仓库目录是 Git 用来保存项目的元数据和对象数据库的地方。这是 Git 中最重要的部分，从其它计算机克隆仓库时，复制的就是这里的数据。
+    暂存区是一个文件，保存了下次将要提交的文件列表信息，一般在 Git 仓库目录中。
+    按照 Git 的术语叫做“索引”，一般叫“暂存区”。
+
+    Git 仓库目录是 Git 用来保存项目的元数据和对象数据库的地方。
+    这是 Git 中最重要的部分，从其它计算机克隆仓库时，复制的就是这里的数据。
 
     基本的 Git 工作流程如下：
-\begin{enumerate}
-    \item 在工作区中修改文件。
-    \item 将你想要下次提交的更改选择性地暂存，这样只会将更改的部分添加到暂存区。
+
+\begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
+    \item 在工作区中修改文件；
+    \item 将你想要下次提交的更改选择性地暂存，这样只会将更改的部分添加到暂存区；
     \item 提交更新，找到暂存区的文件，将快照永久性存储到 Git 目录。
 \end{enumerate}
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale = 0.28]{pictures/03.jpg}
+    \includegraphics[width=0.45\textwidth]{pictures/03.jpg}
     \qquad
-    \includegraphics[scale = 0.28]{pictures/05.jpg}
+    \includegraphics[width=0.45\textwidth]{pictures/05.jpg}
     \caption{Git 工作流}
 \end{figure}
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[scale = 0.5]{pictures/04.jpg}
+    \includegraphics[width=0.80\textwidth]{pictures/04.jpg}
     \caption{Git 文件状态生命周期}
 \end{figure}
 
+\subsection{安装 Git}
+\subsubsection{Arch Linux}
+    \begin{mybox}{}
+        \mydollar \texttt{sudo pacman -S git}
+    \end{mybox}
 
-\subsection*{初次运行 Git 前的配置}
-    我们需要做几件事来定制 Git 环境。每台计算机上只需要配置一次，程序升级时会保留配置信息，可以在任何时候再次通过运行命令来修改它们。
+\subsubsection{Windows}
+    见 \href{https://git-scm.com/}{Git 官网}。
 
-    Git 自带一个 \verb|git config| 的工具来帮助设置控制 Git 外观和行为的配置变量。这些变量存储在三个不同的位置：
-\begin{enumerate}
-    \item \verb|/etc/gitconfig| 文件：包含系统上每一个用户及它们仓库的通用配置。如果在执行 \verb|git config| 时带上 \verb|--system| 选项，那么它就会读写文件中的配置变量。（由于它是系统配置文件，因此需要管理员或超级用户权限来修改它。）
+\subsection{初次运行 Git 前的配置}
+    我们需要做几件事来定制 Git 环境。
+    每台计算机上只需要配置一次，程序升级时会保留配置信息，可以在任何时候再次通过运行命令来修改它们。
+
+    Git 自带一个 \verb|git config| 的工具来帮助设置控制 Git 外观和行为的配置变量。
+    这些变量存储在三个不同的位置：
+
+\begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
+    \item \verb|/etc/gitconfig| 文件：包含系统上每一个用户及它们仓库的通用配置。
+          如果在执行 \verb|git config| 时带上 \verb|--system| 选项，那么它就会读写文件中的配置变量
+          （由于它是系统配置文件，因此需要管理员或超级用户权限来修改它）。
     \item \verb|~/.gitconfig| 或 \verb|~/.config/git/config| 文件：只针对当前用户。可以传递 \verb|--global| 选项让 Git 读写此文件，这会对你系统上所有的仓库生效。
     \item 当前使用仓库的 Git 目录中的 \verb|config| 文件（即 \verb|.git/config| ）：针对该仓库，可以传递 \verb|--local| 选项让 Git 强制读写此文件，虽然默认情况下用的就是它。（当然，你需要进入某个 Git 仓库中才能让该选项生效。）
 \end{enumerate}
+
     每一个级别会覆盖上一级别的配置，所以 \verb|.git/config| 配置变量会覆盖 \verb|/etc/gitconfig| 中的配置变量。
 
-    在 Windows 系统中，Git会查找 \fontspec{Consolas}\$\verb|HOME| 目录下（一般情况是 \verb|C:\User\|\fontspec{Consolas}\$\verb|USER| ）的 \verb|.gitconfig| 文件。
+    在 Windows 系统中，Git 会查找 {\fontspec{Consolas}\$}\verb|HOME| 目录下（一般情况是 \verb|C:\User\|{\fontspec{Consolas}\$}\verb|USER|）的 \verb|.gitconfig| 文件。
 
-\subsection*{用户信息}
-    安装完 Git 后，需要做的第一件事就是设置用户名和邮件地址。每一个 Git 提交都会使用这些信息，它们会写入到每一次提交中，并不可更改：
+\subsection{用户信息}
+    安装完 Git 后，需要做的第一件事就是设置用户名和邮件地址。
+    每一个 Git 提交都会使用这些信息，它们会写入到每一次提交中，并不可更改：
+
 \begin{mybox}{}
-    \mydollar git config --global user.name "tom"
-
-    \mydollar git config --global user.email tom@example.com
+    \mydollar \texttt{git config --global user.name "Tom"}
+    \tcbline
+    \mydollar \texttt{git config --global user.email Tom@example.com}
 \end{mybox}
 
-\section{Git 基础}
-\subsection*{文件的状态变化周期}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[scale = 0.25]{pictures/02.png}
-    \caption{文件的状态变化周期}
-\end{figure}
-\clearpage
+    \textbf{注}：如果使用了 \texttt{--global} 选项，那么该命令只需要运行一次，以后 Git 都会使用这些信息。
+    若想针对特定项目使用不同的用户名与邮件时，可以在该项目目录下运行不带 \texttt{--global} 选项的命令来配置。
 
+
+
+\clearpage
+\section{Git 常见工作流程}
+\subsection{个人使用}
+\subsubsection{本地管理}
+    将个人电脑的磁盘作为本地仓库，而没有远程仓库。
+
+    在想要创建项目的目录下，打开 git bash 命令行窗口，
+    使用 \verb|git init| 命令即可初始化一个本地仓库。
+
+\subsubsection{本地和远程管理}
+    一般使用 Github 作为项目托管平台（远程仓库），
+    先在 Github 上创建一个仓库（作为远程仓库），
+    然后在电脑文件目录下打开 git bash 命令行窗口，
+    使用 \verb|git clone <git_url>| 命令克隆仓库到本地。
+
+\subsection{团队合作}
+\subsubsection{受别人邀请参加项目}
+% https://zhuanlan.zhihu.com/p/519343836
+    以一个例子说明，受别人邀请参加一个项目时，该如何贡献代码。
+    
+    2023 年受邀参与 \href{https://github.com/latexstudio/LaTeXFAQ-cn}{LaTeXFAQ-cn} 项目。
+
+    首先，\href{https://github.com/latexstudio}{仓库创建者} 在项目页面下打开“Settings”，
+    点击“Collaborators”中的“Add people”，输入受邀人的 Github 用户名发起邀请，被邀人受到邮件后同意邀请。
+    这时，被邀请人也有权限修改和提交仓库里的代码了。
+
+    Collaborators 贡献代码的操作：
+
+    \begin{mybox}{将远程仓库的一个分支克隆到本地}
+        \mydollar \texttt{git clone -b <branch> <url>}
+    \end{mybox}
+
+    \begin{mybox}{进行 Collaborator 的用户名与邮箱的配置}
+        \mydollar \texttt{git config user.name "Collaborators's name"}
+
+        \mydollar \texttt{git config user.name "Collaborators's email"}
+    \end{mybox}
+
+    \begin{mybox}{更新远程仓库的修改}
+        \mydollar \texttt{git pull}
+    \end{mybox}
+
+    \begin{mybox}{修改并提交自己的代码}
+        \mydollar \texttt{git add somefile.cpp}
+
+        \mydollar \texttt{git commit -m "Collaborators's push"}
+        
+        \mydollar \texttt{git push}
+    \end{mybox}
+
+
+
+
+
+
+
+
+\clearpage
+\section{Git 常见命令}
 
 \begin{mybox}{git bash 清屏操作}
-    \mydollar \verb|ctrl + L| 将滚动条至于最下方，滚动屏幕还是可以看到之前的命令
+    \mydollar \texttt{ctrl + L} 将滚动条至于最下方，滚动屏幕还是可以看到之前的命令
     \tcbline
-    输入 \verb|reset| 命令，再回车，真正清除屏幕上所有的内容
+    输入 \texttt{reset} 命令，再回车，真正清除屏幕上所有的内容
 \end{mybox}
-
-
-\begin{mybox}{检查 git 配置}
-    \mydollar git config --list --show-origin
-    
-    查看 git 配置以及它们所在的文件
-    \tcbline
-    \mydollar git config --list
-    
-    检查 git 配置，列出所有 git 当时能找到的配置
-    \tcbline
-    \mydollar git config <key>
-    
-    检查 git 的某一项配置，例如，检查用户名 \verb|git config user.name|
-\end{mybox}
-
-
-\begin{mybox}{\mydollar git config --global core.editor emacs}
-    Git 使用操作系统默认的文本编辑器，使用这条命令可以设置默认文本编辑器，例如使用 Emacs
-\end{mybox}
-
 
 \begin{mybox}{获取帮助}
     使用 Git 需要获取帮助时，三个等价的方法找到 Git 命令的综合手册（manpage）
@@ -153,53 +238,96 @@
     \tcbline
     \mydollar git add -h
 
-    如果不需要全面的手册，只需要可用选项的快速参考，可以使用 \verb|-h| 选项获得更简明的"help"。例如这条命令输出命令 \verb|add| 的快速参考
+    如果不需要全面的手册，只需要可用选项的快速参考，
+    可以使用 \verb|-h| 选项获得更简明的"help"。
+    例如这条命令输出命令 \verb|add| 的快速参考
 \end{mybox}
 
+\clearpage
+\subsection{配置 Git}
 
-\begin{mybox}{初始化项目仓库/获取 git 仓库}
-    获取 Git 项目仓库的方法有两种：
-\begin{enumerate}
-    \item 将尚未进行版本控制的本地目录转换为 Git 目录；
-    \item 从其它服务器克隆一个已经存在的 Git 仓库。
-\end{enumerate}
-    这两者中方式都会在本地机器上得到一个工作就绪的 Git 仓库。
-    \tcbline
-    \textbf{在已存在目录中初始化仓库}
-
-    \mydollar git init
-
-    \mydollar git init <project\_name>
-
-    在该目录中创建一个名为 \verb|.git| 的子目录，这个子目录含有初始化的 Git 仓库中所有的必须文件，这些文件是 Git 仓库的骨干。但这只是一个初始化操作，项目里的文件还没有被跟踪。
-    \tcbline
-    \textbf{克隆现有的仓库}
-
-    \mydollar git clone <git\_url>
-
-    \mydollar git clone <git\_url my\_directory>
+\begin{mybox}{检查 Git 配置}
+    \mydollar \texttt{git config --list --show-origin}
     
-    将项目克隆到指定的目录下
+    查看 Git 配置以及它们所在的文件
+    \tcbline
+    \mydollar \texttt{git config --list}
+    
+    检查 Git 配置，列出所有 Git 当时能找到的配置
+    \tcbline
+    \mydollar git config <key>
+    
+    检查 Git 的某一项配置，例如，检查用户名 \verb|git config user.name|
 \end{mybox}
 
-
-\begin{mybox}{\mydollar git status}
-    检查当前文件状态，查看哪些文件处于什么状态
+\begin{mybox}{配置 Git 默认文本编辑器}
+    \mydollar \texttt{git config --global core.editor emacs}
     \tcbline
-\begin{enumerate}
-    \item 该命令的输出十分详细，有些繁琐可以使用 \mydollar git status -s 命令或 \mydollar git status --short 命令，得到格式更加紧凑的输出
-    \item 输出中有两栏，左栏指明了暂存区的状态，右栏指明了工作区的状态
-    \item 新添加的未跟踪文件前面有？？标记
-    \item 新添加到暂存区中的文件前面有 A 标记
-    \item 修改过的文件前面有 M 标记
-    \item MM 表示文件暂存后又做了修改，因此改文件的修改中既有已暂存的部分，又有未暂存的部分
-\end{enumerate}
+
+    Git 使用操作系统默认的文本编辑器，使用这条命令可以设置默认文本编辑器，例如使用 Emacs
+\end{mybox}
+
+\clearpage
+\subsection{获取 Git 仓库}
+    一般有两种方法获取 Git 仓库：
+    
+    \begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
+        \item 将尚未进行版本控制的本地目录转换为 Git 仓库（该目录既可以有文件，也可以没文件）。
+        \item 从其它服务器克隆一个已存在的 Git 仓库。
+    \end{enumerate}
+
+    \begin{mybox}{在已存在目录中初始化仓库}
+        \mydollar \texttt{git init}
+
+        \mydollar \texttt{git init <project\_name>}
+        \tcbline
+        在当前目录下，该命令将创建一个名为 \texttt{.git} 的子目录。
+        这个子目录含有初始化 Git 仓库中所有必须的文件。
+        但这只是一个初始化操作，项目（目录）里的文件还没有被跟踪。
+    \end{mybox}
+
+    \begin{mybox}{克隆现有的仓库}
+        \mydollar git clone <git\_url>
+    
+        \mydollar git clone <git\_url my\_directory>
+        
+        将项目克隆到指定的目录下
+    \end{mybox}
+
+
+% \subsection*{文件的状态变化周期}
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.80\textwidth]{pictures/02.png}
+%     \caption{文件的状态变化周期}
+% \end{figure}
+\clearpage
+\subsection{检查当前文件的状态}
+
+\begin{mybox}{查看文件处于什么状态}
+    \mydollar git status
+
+    该命令的输出十分详细，有些繁琐。
+    \tcbline
+    \mydollar git status -s
+
+    \mydollar git status --short
+
+    格式更加紧凑的输出
+    \tcbline
+    \begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
+        \item 输出中有两栏，左栏指明了暂存区的状态，右栏指明了工作区的状态
+        \item 新添加的未跟踪文件前面有？？标记
+        \item 新添加到暂存区中的文件前面有 A 标记
+        \item 修改过的文件前面有 M 标记
+        \item MM 表示文件暂存后又做了修改，因此改文件的修改中既有已暂存的部分，又有未暂存的部分
+    \end{enumerate}
 \end{mybox}
 
 
 \begin{mybox}{查看已暂存和未暂存的修改}
     \mydollar git diff
-\begin{enumerate}
+\begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
     \item 查看尚未暂存的文件更新了哪些部分，通过文件补丁的格式更加具体地显示哪些行发生了改变
     \item 此命令比较的是工作目录中当前文件和暂存区域快照之间的差异。也就是修改之后还没有暂存起来的变化内容
     \item \verb|git diff| 本身只显示尚未暂存的改动，而不是自上次提交以来所做的所有改动。所以有时候一下子暂存了所有更新过的文件，运行 \verb|git diff| 后却什么也没有，就是这个原因
@@ -256,7 +384,7 @@
     有时候，我们并不需要将目录下所有的文件都纳入 Git 管理，也希望它们总出现在未跟踪文件列表里。通常是一些自动生成的文件，例如日志文件，或者编译过程中创建的临时文件等。此时，可以创建一个名为 \verb|.gitignore| 的文件，在其中列出要忽略的文件的模式。
     \tcbline
     \verb|.gitignore| 文件的格式规范：
-\begin{enumerate}
+\begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
     \item 所有空行或者以 \verb|#| 开头的行都会被 Git 忽略
     \item 可以使用标准的 glob 模式匹配，它会递归地应用在整个工作区中
     \item 匹配模式可以以（/）开头防止递归
@@ -421,7 +549,7 @@
 
 \begin{mybox}{标签}
     Git 支持两种标签：
-\begin{enumerate}
+\begin{enumerate}[labelindent=\parindent, leftmargin=*, align=left]
     \item 轻量标签（lightweight）：很像一个不会改变的分支--它只是某个特定提交的引用。本质上是将提交校验和存储到一个文件中--没有保存任何其他信息
     \item 附注标签（annotated）：存储在 Git 数据库中的一个完整对象，它们是可以被校验的，其中包含打标签者的名字、电子邮件地址、日期时间，此外还有一个标签信息，并且可以使用 GNU Privacy Guard（GPG）签名并验证。如果只是想用一个临时的标签，或者因为某些原因不想要保存这些信息，可以使用轻量标签
 \end{enumerate}
