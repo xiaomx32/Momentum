@@ -1,0 +1,14 @@
+// .h.in 是一种文件类型，通常用于 C/C++ 项目中的配置文件
+// 它是一个模板文件，包含了带替换的宏定义占位符，
+// 用于在配置过程中生成最终的头文件（.h 文件）
+
+// the configured options and settings for Tutorial
+// TODO 10: Define Tutorial_VERSION_MAJOR and Tutorial_VERSION_MINOR
+// @ 是一个占位符，对于每个占位符，需要定义一个对应的变量，并设置其值
+// 这些变量可以是在 CMakeLists.txt 文件中定义的变量，也可以是用户传递给 CMake 的参数
+
+// 调用 configure_file() 时，
+// @Tutorial_VERSION_MAJOR@，@Tutorial_VERSION_MINOR@
+// 的值将替换为 TutorialConfig.h 中项目的相应版本号
+#define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@

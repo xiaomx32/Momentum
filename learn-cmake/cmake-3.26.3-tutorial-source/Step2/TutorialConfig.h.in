@@ -1,0 +1,8 @@
+// the configured options and settings for Tutorial
+#define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@
+
+// TODO 13: use cmakedefine to define USE_MYMATH
+// #cmakedefine 是 CMake 在处理配置文件时使用的预处理指令之一
+// 用于根据 CMake 变量的值在配置文件中生成对应的宏定义
+#cmakedefine USE_MYMATH
