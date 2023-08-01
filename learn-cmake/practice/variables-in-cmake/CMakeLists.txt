@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.24...3.26 FATAL_ERROR)
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(Hello
+    LANGUAGES CXX
+    VERSION 1.2.3
+    DESCRIPTION "Just show some variables in cmake to you"
+    HOMEPAGE_URL https://github.com/xiaomx32
+)
+
+add_executable(${PROJECT_NAME} main.cpp)
+
+message("in main CMakeLists.txt")
+message("CMAKE_VERSION: ${CMAKE_VERSION}")
+message("CMAKE_MINIMUM_REQUIRED_VERSION: ${CMAKE_MINIMUM_REQUIRED_VERSION}")
+
+message("PROJECT_NAME: ${PROJECT_NAME}")
+message("PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}")
+message("PROJECT_HOMEPAGE_URL: ${PROJECT_HOMEPAGE_URL}") 
+
+message("PROJECT_VERSION: ${PROJECT_VERSION}")
+message("PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
+message("PROJECT_VERSION_MINOR: ${PROJECT_VERSION_MINOR}")
+message("PROJECT_VERSION_PATCH: ${PROJECT_VERSION_PATCH}")
+
+message("PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+message("PROJECT_BINARY_DIR: ${PROJECT_BINARY_DIR}")
+message("Hello_SOURCE_DIR: ${Hello_SOURCE_DIR}")
+message("Hello_BINARY_DIR: ${Hello_BINARY_DIR}")
+
+message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message("CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+
+
+add_subdirectory(hello) 
+target_link_libraries(${PROJECT_NAME} PUBLIC hello)

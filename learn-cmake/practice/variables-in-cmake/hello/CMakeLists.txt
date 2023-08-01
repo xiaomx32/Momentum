@@ -1,0 +1,10 @@
+#add_library(hello OBJECT hello.h hello.cpp)
+add_library(hello OBJECT)
+target_sources(hello PRIVATE hello.h hello.cpp)
+target_include_directories(hello PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+message("in hello CMakeLists.txt")
+message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+message("CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
