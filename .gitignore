@@ -2,6 +2,7 @@
 
 #### LaTeX ####
 ## Core latex/pdflatex auxiliary files:
+images/
 *.aux
 *.lof
 *.log
